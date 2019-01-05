@@ -22,7 +22,7 @@ n_hidden = [2000, 1600, 1200];
 
 n_input =   867;
 
-datasize = 3560;
+datasize = 356;
 
 orig_data=np.empty((datasize,n_input))
 dark_data=np.empty((datasize,n_input))
@@ -67,10 +67,10 @@ for i in range (datasize):
     temp_n = temp_n.ravel()
     temp_c = temp_c.ravel()
 
-    orig_data[i,:] = temp_o;
-    dark_data[i,:] = temp_d;
-    nois_data[i,:] = temp_n;
-    comb_data[i,:] = temp_c;
+    orig_data[i,:] = np.true_divide(temp_o,255.);
+    dark_data[i,:] = np.true_divide(temp_d,255.);
+    nois_data[i,:] = np.true_divide(temp_n,255.);
+    comb_data[i,:] = np.true_divide(temp_c,255.);
 
 print("Data Load Complete\n")
 
@@ -87,7 +87,7 @@ traindata_c,testdata_c = np.array_split(comb_data,2)
 
 learning_rate = 0.1
 training_epoch = 20000
-batch_size = int(datasize / 178)
+batch_size = int(datasize / 1)
 
 
 
@@ -144,7 +144,7 @@ decoder = tf.nn.dropout(decoder,keeprate);
 ######################################################
 #################cost&optimizer set###################
 rho = 0.5;
-beta = 0.1;
+beta = 0.01;
 lamda = 0.1;
 
 L2norm_recon = tf.multiply(tf.norm(ORG-decoder,ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean'))/(2*batch_size);
@@ -156,20 +156,20 @@ rhohat_e2 = tf.reduce_sum(encoder2,0);
 rhohat_d1 = tf.reduce_sum(decoder1,0);
 rhohat_d2 = tf.reduce_sum(decoder2,0);
 
-log_e = tf.subtract(tf.log(rho),tf.log(rhohat_e));
-log_e_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.to_float(1)-rhohat_e));
+log_e = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e,1e-8,1.)));
+log_e_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-8,1.)));
 
-log_e1 = tf.subtract(tf.log(rho),tf.log(rhohat_e));
-log_e1_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.to_float(1)-rhohat_e));
+log_e1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e1,1e-8,1.)));
+log_e1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e1,1e-8,1.)));
 
-log_e2 = tf.subtract(tf.log(rho),tf.log(rhohat_e));
-log_e2_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.to_float(1)-rhohat_e));
+log_e2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e2,1e-8,1.)));
+log_e2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e2,1e-8,1.)));
 
-log_d1 = tf.subtract(tf.log(rho),tf.log(rhohat_e));
-log_d1_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.to_float(1)-rhohat_e));
+log_d1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d1,1e-8,1.)));
+log_d1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d1,1e-8,1.)));
 
-log_d2 = tf.subtract(tf.log(rho),tf.log(rhohat_e));
-log_d2_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.to_float(1)-rhohat_e));
+log_d2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d2,1e-8,1.)));
+log_d2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d2,1e-8,1.)));
 
 kl_e = tf.add(tf.multiply(rho,log_e),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e_1))
 kl_e1 = tf.add(tf.multiply(rho,log_e1),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e1_1))
@@ -228,7 +228,7 @@ for path in SAVER_DIR:
     
         print("Model  " + path + "  Load Complete")
     else:
-        best_cost = 99999
+        best_cost = np.inf
 
         print("Model  " + path + "  Train Start")    
         for epoch in range(training_epoch):
@@ -244,7 +244,7 @@ for path in SAVER_DIR:
 
             
             if epoch < 30:    
-                print("Pretraining Epoch " + str(epoch))
+                print("Pretraining Epoch " + str(epoch +1 ))
                 for i in range(total_batch):
                     _, _ = sess.run([optimizer_da1, cost_da1],
                                feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
@@ -254,7 +254,7 @@ for path in SAVER_DIR:
                                feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
 
             elif epoch < 230:
-                print("Finetuning Stage 1 Epoch " + str(epoch-30))
+                print("Finetuning Stage 1 Epoch " + str(epoch-29))
                 for i in range(total_batch):
                     _, cost_val = sess.run([optimizer_ssda_200, cost_ssda],
                                feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
@@ -266,12 +266,15 @@ for path in SAVER_DIR:
                 print('Finetuning Stage 2 Epoch:', '%04d' % (epoch -230 + 1),
                     'Avg. cost =', '{:.4f}'.format((total_cost)/ total_batch))
 
-                if (best_cost-total_cost)/best_cost >= 0.005 :
+                if best_cost == np.inf:
+                    best_cost = total_cost;
+                elif best_cost>total_cost :
                     saver.save(sess, ckpt_path, global_step=training_epoch)
                     best_cost = total_cost
                     print("model saved")
                 else:
-                    break
+                    #break
+                    continue
 
     print("Optimization for model " + path + "complete")
     #saver.save(sess, ckpt_path, global_step=training_epoch)
