@@ -22,7 +22,7 @@ n_hidden = [2000, 1600, 1200];
 
 n_input =   867;
 
-datasize = 356;
+datasize = 356000;
 
 orig_data=np.empty((datasize,n_input))
 dark_data=np.empty((datasize,n_input))
@@ -87,7 +87,7 @@ traindata_c,testdata_c = np.array_split(comb_data,2)
 
 learning_rate = 0.1
 training_epoch = 20000
-batch_size = int(datasize / 1)
+batch_size = int(datasize / 178)
 
 
 
