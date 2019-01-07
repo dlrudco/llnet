@@ -1,8 +1,8 @@
-dList =dir('part10/*.jpg'); 
+%dList =dir('part10/*.jpg'); 
 %만약 JPG파일포맷이 아닌 다른 파일 포맷이 있을 경우,반복적으로 [dir 함수]를 사용하기 바람.
 % 해당 명령어로 이미지 파일들을 다 찾을 수 있음.
 % 만약 이미지가 다른 디렉토리에 있을 경우,  ["경로" ".확장명"] 으로 처리가능
-k =length(dList);
+%k =length(dList);
 patch = gpuArray(zeros(17,17,3,200));
 dark_patch = gpuArray(zeros(17,17,3,200));
 noise_patch = gpuArray(zeros(17,17,3,200));
