@@ -10,13 +10,13 @@ from PIL import Image
 n_hidden = [2000, 1600, 1200]; 
 
 
-n_input =   867;
+n_input =   289;
 datasize = 8370;
 
-orig_data=np.empty((datasize,n_input))
-dark_data=np.empty((datasize,n_input))
-nois_data=np.empty((datasize,n_input))
-comb_data=np.empty((datasize,n_input))
+orig_data=np.empty((3,datasize,n_input))
+dark_data=np.empty((3,datasize,n_input))
+nois_data=np.empty((3,datasize,n_input))
+comb_data=np.empty((3,datasize,n_input))
 
 for i in range (datasize):
     if i%1000 == 0:
@@ -51,15 +51,35 @@ for i in range (datasize):
     except SystemError:
         temp_c = np.asarray( img_c.getdata(), dtype='uint8' )
 
-    temp_o = temp_o.ravel()
-    temp_d = temp_d.ravel()
-    temp_n = temp_n.ravel()
-    temp_c = temp_c.ravel()
+    temp_o_r = temp_o[:,:,0].ravel()
+    temp_d_r = temp_d[:,:,0].ravel()
+    temp_n_r = temp_n[:,:,0].ravel()
+    temp_c_r = temp_c[:,:,0].ravel()
 
-    orig_data[i,:] = np.true_divide(temp_o,255.);
-    dark_data[i,:] = np.true_divide(temp_d,255.);
-    nois_data[i,:] = np.true_divide(temp_n,255.);
-    comb_data[i,:] = np.true_divide(temp_c,255.);
+    temp_o_g = temp_o[:,:,1].ravel()
+    temp_d_g = temp_d[:,:,1].ravel()
+    temp_n_g = temp_n[:,:,1].ravel()
+    temp_c_g = temp_c[:,:,1].ravel()
+
+    temp_o_b = temp_o[:,:,2].ravel()
+    temp_d_b = temp_d[:,:,2].ravel()
+    temp_n_b = temp_n[:,:,2].ravel()
+    temp_c_b = temp_c[:,:,2].ravel()
+
+    orig_data[0,i,:] = np.true_divide(temp_o_r,255.);
+    dark_data[0,i,:] = np.true_divide(temp_d_r,255.);
+    nois_data[0,i,:] = np.true_divide(temp_n_r,255.);
+    comb_data[0,i,:] = np.true_divide(temp_c_r,255.);
+
+    orig_data[1,i,:] = np.true_divide(temp_o_g,255.);
+    dark_data[1,i,:] = np.true_divide(temp_d_g,255.);
+    nois_data[1,i,:] = np.true_divide(temp_n_g,255.);
+    comb_data[1,i,:] = np.true_divide(temp_c_g,255.);
+
+    orig_data[2,i,:] = np.true_divide(temp_o_b,255.);
+    dark_data[2,i,:] = np.true_divide(temp_d_b,255.);
+    nois_data[2,i,:] = np.true_divide(temp_n_b,255.);
+    comb_data[2,i,:] = np.true_divide(temp_c_b,255.);
 
 print("Data Load Complete\n")
 
