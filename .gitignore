@@ -1,2 +1,10 @@
-model-*
+model_combine_rlb10101_0/
+model_combine_rlb10101_1/
+model_combine_rlb10101_2/
+model_noise_rlb10101_0/
+model_noise_rlb10101_1/
+model_noise_rlb10101_2/
+model_dark_rlb10101_0/
+model_dark_rlb10101_1/
+model_dark_rlb10101_2/
 *.jpg
