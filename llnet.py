@@ -133,50 +133,59 @@ decoder = tf.nn.sigmoid(
                 tf.add(tf.matmul(decoder1, W_decode), b_decode))
 decoder = tf.nn.dropout(decoder,keeprate);
 
-SAVER_DIR = ["model_dark_rlb511","model_noise_rlb511","model_combine_rlb511"]
+SAVER_DIR = ["model_dark_rlb10101_","model_noise_rlb10101_","model_combine_rlb10101_"]
+
+arr = np.empty((datasize,17,17,3))
+arr2 = np.empty((17,17,3))
+for i in range(datasize) :
+    if i%1000 == 0:
+        print(i)
+    arr2[:,:,0] = np.multiply(orig_data[0,i,:],255.).reshape(17,17);
+    arr2[:,:,1] = np.multiply(orig_data[1,i,:],255.).reshape(17,17);
+    arr2[:,:,2] = np.multiply(orig_data[2,i,:],255.).reshape(17,17);
+    arr2 = arr2.astype(np.uint8)
+
+    img2 = Image.fromarray(arr2,'RGB')
+    img2.save('recon_o/'+str(i)+'.jpg', 'JPEG')
 
 for path in SAVER_DIR:
-    saver = tf.train.Saver()
-    ckpt_path = os.path.join(path,"model")
-    ckpt = tf.train.get_checkpoint_state(path)
+    for j in range(3):
+        saver = tf.train.Saver()
+        rgbpath = path + str(j);
+        ckpt_path = os.path.join(rgbpath,"model")
+        ckpt = tf.train.get_checkpoint_state(rgbpath)
 
-    init = tf.global_variables_initializer()
-    sess = tf.Session()
-    sess.run(init)
+        sess = tf.Session()
 
-    earlystop = 0;
-
-    if ckpt and ckpt.model_checkpoint_path:
-        saver.restore(sess, ckpt.model_checkpoint_path)
-    
-        print("Model  " + path + "  Load Complete")
-    else:
-        print('no trained model! Train model first')
-        break;
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+            print("Model  " + rgbpath + "  Load Complete")
+        else:
+            print('no trained model! Train model first')
+            break;
 
 
-    if path == "model_dark_rlb511":
-        modified = sess.run(decoder,
-                   feed_dict={X:dark_data, keeprate: 1})
-    elif path =="model_noise_rlb511":
-        modified = sess.run(decoder,
-                   feed_dict={X:nois_data, keeprate: 1})
-    elif path == "model_combine_rlb511":
-        modified = sess.run(decoder,
-                   feed_dict={X:comb_data, keeprate: 1})
 
-    for i in range(datasize) :
-        if i%1000 == 0:
-            print(i)
+        if path[6] == "d":
+            modified = sess.run(decoder,
+                   feed_dict={X:dark_data[j,:,:], keeprate: 1})
+        elif path[6] =="n":
+            modified = sess.run(decoder,
+                   feed_dict={X:nois_data[j,:,:], keeprate: 1})
+        elif path[6] == "c":
+            modified = sess.run(decoder,
+                   feed_dict={X:comb_data[j,:,:], keeprate: 1})
 
-        arr = np.multiply(modified[i,:],255.).astype(np.uint8).reshape(17,17,3);
-        img = Image.fromarray(arr, 'RGB')
-        if path == "model_dark_rlb511":
-            img.save('recon_d/'+str(i)+'.jpg', 'JPEG')
-        elif path =="model_noise_rlb511":
-            img.save('recon_n/'+str(i)+'.jpg', 'JPEG')
-        elif path == "model_combine_rlb511":
-            img.save('recon_c/'+str(i)+'.jpg', 'JPEG')
-        arr2 = np.multiply(orig_data[i,:],255.).astype(np.uint8).reshape(17,17,3);
-        img2 = Image.fromarray(arr2, 'RGB')
-        img2.save('recon_o/'+str(i)+'.jpg', 'JPEG')
+        for i in range(datasize) :
+            if i%1000 == 0:
+                print(i)
+            arr[i,:,:,j] = np.multiply(modified[i,:],255.).reshape(17,17);
+            if j == 2:
+                img = Image.fromarray(arr[i,:,:,:].astype(np.uint8), 'RGB')
+                if path[6] == "d":
+                    img.save('recon_d/'+str(i)+'.jpg', 'JPEG')
+                elif path[6] =="n":
+                    img.save('recon_n/'+str(i)+'.jpg', 'JPEG')
+                elif path[6] == "c":
+                    img.save('recon_c/'+str(i)+'.jpg', 'JPEG')
+        
