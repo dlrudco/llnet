@@ -220,9 +220,9 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb10101_0","model_noise_rlb10101_0","model_combine_rlb10101_0"
-			,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
-			,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
+SAVER_DIR = ["model_dark_rlb10101_0","model_noise_rlb10101_0","model_combine_rlb10101_0"]
+			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
+			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
 
 ind = 0;
 for path in SAVER_DIR:
