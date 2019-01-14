@@ -25,21 +25,21 @@ datasize = 356000;
 
 orig_data=np.empty((datasize,n_input))
 dark_data=np.empty((datasize,n_input))
-nois_data=np.empty((datasize,n_input))
-comb_data=np.empty((datasize,n_input))
+#nois_data=np.empty((datasize,n_input))
+#comb_data=np.empty((datasize,n_input))
 
 for i in range (datasize):
 	if i%1000 == 0:
 		print(i)
 	filename_o = 'original/' + str(201+i) + '.jpg';
 	filename_d = 'darken/' + str(201+i) + '.jpg';
-	filename_n = 'noise/' + str(201+i) + '.jpg';
-	filename_c = 'combine/' + str(201+i) + '.jpg';
+	#filename_n = 'noise/' + str(201+i) + '.jpg';
+	#filename_c = 'combine/' + str(201+i) + '.jpg';
 
 	img_o = Image.open( filename_o ).convert('L')
 	img_d = Image.open( filename_d ).convert('L')
-	img_n = Image.open( filename_n ).convert('L')
-	img_c = Image.open( filename_c ).convert('L')
+	#img_n = Image.open( filename_n ).convert('L')
+	#img_c = Image.open( filename_c ).convert('L')
 
 	try:
 		temp_o = np.asarray( img_o, dtype='uint8' )
@@ -51,26 +51,26 @@ for i in range (datasize):
 	except SystemError:
 		temp_d = np.asarray( img_d.getdata(), dtype='uint8' )
 
-	try:
-		temp_n = np.asarray( img_n, dtype='uint8' )
-	except SystemError:
-		temp_n = np.asarray( img_n.getdata(), dtype='uint8' )
-
-	try:
-		temp_c = np.asarray( img_c, dtype='uint8' )
-	except SystemError:
-		temp_c = np.asarray( img_c.getdata(), dtype='uint8' )
+#	try:
+#		temp_n = np.asarray( img_n, dtype='uint8' )
+#	except SystemError:
+#		temp_n = np.asarray( img_n.getdata(), dtype='uint8' )
+#
+#	try:
+#		temp_c = np.asarray( img_c, dtype='uint8' )
+#	except SystemError:
+#		temp_c = np.asarray( img_c.getdata(), dtype='uint8' )
 
 	temp_o = temp_o[:,:].ravel()
 	temp_d = temp_d[:,:].ravel()
-	temp_n = temp_n[:,:].ravel()
-	temp_c = temp_c[:,:].ravel()
+#	temp_n = temp_n[:,:].ravel()
+#	temp_c = temp_c[:,:].ravel()
 
 
 	orig_data[i,:] = np.true_divide(temp_o,255.);
 	dark_data[i,:] = np.true_divide(temp_d,255.);
-	nois_data[i,:] = np.true_divide(temp_n,255.);
-	comb_data[i,:] = np.true_divide(temp_c,255.);
+#	nois_data[i,:] = np.true_divide(temp_n,255.);
+#	comb_data[i,:] = np.true_divide(temp_c,255.);
 
 
 print("Data Load Complete\n")
@@ -94,7 +94,8 @@ b_encode = tf.Variable(tf.random_normal([n_hidden[0]]))
 encoder = tf.nn.sigmoid(
 				tf.add(tf.matmul(X, W_encode), b_encode))
 #encoder = tf.nn.dropout(encoder,keeprate);
-
+encoder_pre = tf.nn.sigmoid(
+				tf.add(tf.matmul(ORG, W_encode), b_encode))
 
 
 W_encode1 = tf.Variable(tf.random_normal([n_hidden[0], n_hidden[1]]))
@@ -104,6 +105,8 @@ b_encode1 = tf.Variable(tf.random_normal([n_hidden[1]]))
 encoder1 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder, W_encode1), b_encode1))
 #encoder1 = tf.nn.dropout(encoder1,keeprate);
+encoder1_pre = tf.nn.sigmoid(
+				tf.add(tf.matmul(encoder_pre, W_encode1), b_encode1))
 
 W_encode2 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[2]]))
 b_encode2 = tf.Variable(tf.random_normal([n_hidden[2]]))
@@ -129,6 +132,7 @@ decoder1 = tf.nn.sigmoid(
 
 decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
 
+
 W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
 b_decode = tf.Variable(tf.random_normal([n_input]))
 
@@ -143,9 +147,9 @@ beta = 0.3;
 lamda = 0.1;
 
 L2norm_total = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder),ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean')),(2*batch_size));
-L2norm_pre1 = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean')),(2*batch_size));
-L2norm_pre2 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder,decoder1_pre),ord='euclidean'),tf.norm(encoder-decoder1,ord='euclidean')),(2*batch_size));
-L2norm_pre3 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder1,decoder2),ord='euclidean'),tf.norm(encoder1-decoder2,ord='euclidean')),(2*batch_size));
+L2norm_pre1 = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean'),tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean')),(2*batch_size));
+L2norm_pre2 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder_pre,decoder1_pre),ord='euclidean'),tf.norm(tf.subtract(encoder_pre,decoder1_pre),ord='euclidean')),(2*batch_size));
+L2norm_pre3 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder1_pre,decoder2),ord='euclidean'),tf.norm(tf.subtract(encoder1_pre,decoder2),ord='euclidean')),(2*batch_size));
 
 rhohat_e = tf.reduce_mean(encoder,0);
 rhohat_e1 = tf.reduce_mean(encoder1,0);
@@ -208,7 +212,8 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb531_gray","model_noise_rlb531_gray","model_combine_rlb531_gray"]
+SAVER_DIR = ["model_dark_rlb531_gray"]
+			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
 			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
 
