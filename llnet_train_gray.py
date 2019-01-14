@@ -126,7 +126,11 @@ b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
 decoder1 = tf.nn.sigmoid(
 				tf.add(tf.matmul(decoder2, W_decode1), b_decode1))
 #decoder1 = tf.nn.dropout(decoder1,keeprate);
+<<<<<<< HEAD
 decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
+=======
+decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_)))
+>>>>>>> bf125f47bddf584b5640ea7f6d9588981d1ad884
 
 W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
 b_decode = tf.Variable(tf.random_normal([n_input]))
