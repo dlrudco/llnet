@@ -36,10 +36,10 @@ for i in range (datasize):
 	filename_n = 'noise/' + str(201+i) + '.jpg';
 	filename_c = 'combine/' + str(201+i) + '.jpg';
 
-	img_o = Image.open( filename_o ).convert('LA')
-	img_d = Image.open( filename_d ).convert('LA')
-	img_n = Image.open( filename_n ).convert('LA')
-	img_c = Image.open( filename_c ).convert('LA')
+	img_o = Image.open( filename_o ).convert('L')
+	img_d = Image.open( filename_d ).convert('L')
+	img_n = Image.open( filename_n ).convert('L')
+	img_c = Image.open( filename_c ).convert('L')
 
 	try:
 		temp_o = np.asarray( img_o, dtype='uint8' )
@@ -119,8 +119,6 @@ b_decode2 = tf.Variable(tf.random_normal([n_hidden[1]]))
 decoder2 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder2, W_decode2), b_decode2))
 #decoder2 = tf.nn.dropout(decoder2,keeprate);
-decoder2_pre = tf.nn.sigmoid(
-				tf.add(tf.matmul(encoder2, W_decode2), b_decode2))
 
 W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
 b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
@@ -128,7 +126,7 @@ b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
 decoder1 = tf.nn.sigmoid(
 				tf.add(tf.matmul(decoder2, W_decode1), b_decode1))
 #decoder1 = tf.nn.dropout(decoder1,keeprate);
-decoder1_pre = tf.nn.sigmoid.(tf.add(tf.matmul(encoder1,W_)))
+decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
 
 W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
 b_decode = tf.Variable(tf.random_normal([n_input]))
@@ -146,14 +144,14 @@ lamda = 0.1;
 L2norm_total = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder),ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean')),(2*batch_size));
 L2norm_pre1 = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean')),(2*batch_size));
 L2norm_pre2 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder,decoder1_pre),ord='euclidean'),tf.norm(encoder-decoder1,ord='euclidean')),(2*batch_size));
-L2norm_pre3 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder1,decoder2_pre),ord='euclidean'),tf.norm(encoder1-decoder2,ord='euclidean')),(2*batch_size));
+L2norm_pre3 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder1,decoder2),ord='euclidean'),tf.norm(encoder1-decoder2,ord='euclidean')),(2*batch_size));
 
-rhohat_e = tf.reduce_sum(encoder,0);
-rhohat_e1 = tf.reduce_sum(encoder1,0);
-rhohat_e2 = tf.reduce_sum(encoder2,0);
+rhohat_e = tf.reduce_mean(encoder,0);
+rhohat_e1 = tf.reduce_mean(encoder1,0);
+rhohat_e2 = tf.reduce_mean(encoder2,0);
 
-rhohat_d1 = tf.reduce_sum(decoder1,0);
-rhohat_d2 = tf.reduce_sum(decoder2,0);
+rhohat_d1 = tf.reduce_mean(decoder1_pre,0);
+rhohat_d2 = tf.reduce_mean(decoder2);
 
 log_e = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e,1e-8,1.)));
 log_e_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-8,1.)));
@@ -194,11 +192,11 @@ weight_decay_1 = tf.multiply(lamda,tf.add(fnorm_e,fnorm_d1));
 weight_decay_2 = tf.multiply(lamda,tf.add(fnorm_e1,fnorm_d2));
 weight_decay_3 = tf.multiply(lamda,fnorm_e2);
 
-cost_da1 = L2norm_recon1 + kl1 + weight_decay_1;
-cost_da2 = L2norm_recon2 + kl2 + weight_decay_2;
-cost_da3 = L2norm_recon3 + kl3 + weight_decay_3;
+cost_da1 = L2norm_pre1 + kl1 + weight_decay_1;
+cost_da2 = L2norm_pre2 + kl2 + weight_decay_2;
+cost_da3 = L2norm_pre3 + kl3 + weight_decay_3;
 
-cost_ssda = L2norm_recon1 + weight_decay_tot;
+cost_ssda = L2norm_total + weight_decay_tot;
 #######################################
 optimizer_da1 = tf.train.AdamOptimizer(learning_rate).minimize(cost_da1)
 optimizer_da2 = tf.train.AdamOptimizer(learning_rate).minimize(cost_da2)
@@ -209,17 +207,17 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb10101_0","model_noise_rlb10101_0","model_combine_rlb10101_0"]
+SAVER_DIR = ["model_dark_rlb531_gray","model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
 			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
 
-ind = 0;
+#ind = 0;
 for path in SAVER_DIR:
-	channel = int(ind/3) % 3;
-	ind += 1
-	if channel != int(path[-1]):
-		print("channel assignment error! pls check")
-		break;
+	#channel = int(ind/3) % 3;
+	#ind += 1
+	#if channel != int(path[-1]):
+	#	print("channel assignment error! pls check")
+	#	break;
 
 	saver = tf.train.Saver()
 	ckpt_path = os.path.join(path,"model")
@@ -241,41 +239,55 @@ for path in SAVER_DIR:
 
 		for epoch in range(training_epoch):
 			total_cost = 0
-			orig =  np.random.RandomState(epoch).permutation(orig_data[channel,:,:]);
+			orig =  np.random.RandomState(epoch).permutation(orig_data);
 			if path[6] == "d":
-				batch = np.random.RandomState(epoch).permutation(dark_data[channel,:,:])
+				batch = np.random.RandomState(epoch).permutation(dark_data)
 			elif path[6] =="n":
-				batch = np.random.RandomState(epoch).permutation(nois_data[channel,:,:])
+				batch = np.random.RandomState(epoch).permutation(nois_data)
 			elif path[6] == "c":
-				batch = np.random.RandomState(epoch).permutation(comb_data[channel,:,:]);
+				batch = np.random.RandomState(epoch).permutation(comb_data);
 			
 			if epoch < 30:    
 				for i in range(total_batch):
 					_, cost_val1 = sess.run([optimizer_da1, cost_da1],
-						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
+						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					total_cost = total_cost + cost_val1 
+
+				print("Pretraining DA1 Epoch:", "%04d" % (epoch + 1),
+						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+			elif epoch < 60:    
+				for i in range(total_batch):
 					_, cost_val2 = sess.run([optimizer_da2, cost_da2],
-						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
-					_, cost_val3 = sess.run([optimizer_da3, cost_da3],
-						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
-					total_cost = total_cost + cost_val1 + cost_val2 + cost_val3
+						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					total_cost = total_cost + cost_val2
 					#print(cost_val1.shape)
 					#print(cost_val2.shape)
 					#print(cost_val3.shape)
-				print("Pretraining Epoch:", "%04d" % (epoch + 1),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ (3*total_batch)))
-			elif epoch < 230:
+				print("Pretraining Epoch:", "%04d" % (epoch -29),
+						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+			elif epoch < 90:    
+				for i in range(total_batch):
+					_, cost_val3 = sess.run([optimizer_da3, cost_da3],
+						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					total_cost = total_cost + cost_val3
+					#print(cost_val1.shape)
+					#print(cost_val2.shape)
+					#print(cost_val3.shape)
+				print("Pretraining Epoch:", "%04d" % (epoch -59),
+						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+			elif epoch < 290:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_200, cost_ssda],
-						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
+						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
-				print("Finetuning Stage 1 Epoch:", "%04d" % (epoch -29),
+				print("Finetuning Stage 1 Epoch:", "%04d" % (epoch -89),
 						"Avg. cost =", "{:.4f}".format((total_cost)/ total_batch))
 			else:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_after, cost_ssda],
-						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:], keeprate: 1})
+						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
-				print("Finetuning Stage 2 Epoch:", "%04d" % (epoch -230 + 1),
+				print("Finetuning Stage 2 Epoch:", "%04d" % (epoch -290 + 1),
 						"Avg. cost =", "{:.4f}".format((total_cost)/ total_batch))
 
 				if best_cost == np.inf:
