@@ -116,14 +116,16 @@ encoder2 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder1, W_encode2), b_encode2))
 #encoder2 = tf.nn.dropout(encoder2,keeprate);
 
-W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
+#W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
+W_decode = tf.transpose(W_encode2)
 b_decode2 = tf.Variable(tf.random_normal([n_hidden[1]]))
 
 decoder2 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder2, W_decode2), b_decode2))
 #decoder2 = tf.nn.dropout(decoder2,keeprate);
 
-W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
+#W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
+W_decode1 = tf.transpose(W_encode1)
 b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
 
 decoder1 = tf.nn.sigmoid(
@@ -133,7 +135,8 @@ decoder1 = tf.nn.sigmoid(
 decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
 
 
-W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
+#W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
+W_decode = tf.transpose(W_encode)
 b_decode = tf.Variable(tf.random_normal([n_input]))
 
 decoder = tf.nn.sigmoid(
@@ -146,42 +149,42 @@ rho = 0.5;
 beta = 0.3;
 lamda = 0.1;
 
-L2norm_total = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder),ord='euclidean'),tf.norm(ORG-decoder,ord='euclidean')),(2*batch_size));
+L2norm_total = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder),ord='euclidean'),tf.norm(tf.subtract(ORG,decoder),ord='euclidean')),(2*batch_size));
 L2norm_pre1 = tf.divide(tf.multiply(tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean'),tf.norm(tf.subtract(ORG,decoder_pre),ord='euclidean')),(2*batch_size));
 L2norm_pre2 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder_pre,decoder1_pre),ord='euclidean'),tf.norm(tf.subtract(encoder_pre,decoder1_pre),ord='euclidean')),(2*batch_size));
 L2norm_pre3 = tf.divide(tf.multiply(tf.norm(tf.subtract(encoder1_pre,decoder2),ord='euclidean'),tf.norm(tf.subtract(encoder1_pre,decoder2),ord='euclidean')),(2*batch_size));
 
-rhohat_e = tf.reduce_mean(encoder,0);
-rhohat_e1 = tf.reduce_mean(encoder1,0);
-rhohat_e2 = tf.reduce_mean(encoder2,0);
+#rhohat_e = tf.reduce_mean(encoder,0);
+#rhohat_e1 = tf.reduce_mean(encoder1,0);
+#rhohat_e2 = tf.reduce_mean(encoder2,0);
 
-rhohat_d1 = tf.reduce_mean(decoder1_pre,0);
-rhohat_d2 = tf.reduce_mean(decoder2);
+#rhohat_d1 = tf.reduce_mean(decoder1_pre,0);
+#rhohat_d2 = tf.reduce_mean(decoder2);
 
-log_e = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e,1e-8,1.)));
-log_e_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-8,1.)));
+#log_e = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e,1e-8,1.)));
+#log_e_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-8,1.)));
 
-log_e1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e1,1e-8,1.)));
-log_e1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e1,1e-8,1.)));
+#log_e1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e1,1e-8,1.)));
+#log_e1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e1,1e-8,1.)));
 
-log_e2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e2,1e-8,1.)));
-log_e2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e2,1e-8,1.)));
+#log_e2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_e2,1e-8,1.)));
+#log_e2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e2,1e-8,1.)));
 
-log_d1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d1,1e-8,1.)));
-log_d1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d1,1e-8,1.)));
+#log_d1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d1,1e-8,1.)));
+#log_d1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d1,1e-8,1.)));
 
-log_d2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d2,1e-8,1.)));
-log_d2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d2,1e-8,1.)));
+#log_d2 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d2,1e-8,1.)));
+#log_d2_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d2,1e-8,1.)));
 
-kl_e = tf.add(tf.multiply(rho,log_e),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e_1))
-kl_e1 = tf.add(tf.multiply(rho,log_e1),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e1_1))
-kl_e2 = tf.add(tf.multiply(rho,log_e2),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e2_1))
-kl_d1 = tf.add(tf.multiply(rho,log_d1),tf.multiply(tf.subtract(tf.to_float(1),rho),log_d1_1))
-kl_d2 = tf.add(tf.multiply(rho,log_d2),tf.multiply(tf.subtract(tf.to_float(1),rho),log_d2_1))
+#kl_e = tf.add(tf.multiply(rho,log_e),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e_1))
+#kl_e1 = tf.add(tf.multiply(rho,log_e1),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e1_1))
+#kl_e2 = tf.add(tf.multiply(rho,log_e2),tf.multiply(tf.subtract(tf.to_float(1),rho),log_e2_1))
+#kl_d1 = tf.add(tf.multiply(rho,log_d1),tf.multiply(tf.subtract(tf.to_float(1),rho),log_d1_1))
+#kl_d2 = tf.add(tf.multiply(rho,log_d2),tf.multiply(tf.subtract(tf.to_float(1),rho),log_d2_1))
 
-kl1 = tf.multiply(beta,tf.reduce_mean(tf.add(kl_e,kl_d1)));
-kl2 = tf.multiply(beta,tf.reduce_mean(tf.add(kl_e1,kl_d2)));
-kl3 = tf.multiply(beta,tf.reduce_mean(kl_e2));
+#kl1 = tf.multiply(beta,tf.reduce_mean(tf.add(kl_e,kl_d1)));
+#kl2 = tf.multiply(beta,tf.reduce_mean(tf.add(kl_e1,kl_d2)));
+#kl3 = tf.multiply(beta,tf.reduce_mean(kl_e2));
 
 
 fnorm_e = tf.divide(tf.multiply(tf.norm(W_encode),tf.norm(W_encode)),(2*batch_size));
@@ -197,9 +200,9 @@ weight_decay_1 = tf.multiply(lamda,tf.add(fnorm_e,fnorm_d1));
 weight_decay_2 = tf.multiply(lamda,tf.add(fnorm_e1,fnorm_d2));
 weight_decay_3 = tf.multiply(lamda,fnorm_e2);
 
-cost_da1 = L2norm_pre1 + kl1 + weight_decay_1;
-cost_da2 = L2norm_pre2 + kl2 + weight_decay_2;
-cost_da3 = L2norm_pre3 + kl3 + weight_decay_3;
+cost_da1 = L2norm_pre1 + weight_decay_1 #+kl1
+cost_da2 = L2norm_pre2 + weight_decay_2 #+kl2
+cost_da3 = L2norm_pre3 + weight_decay_3 #+kl3
 
 cost_ssda = L2norm_total + weight_decay_tot;
 #######################################
