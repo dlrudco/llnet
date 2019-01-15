@@ -6,6 +6,8 @@ import os
 from pandas import read_csv
 from sklearn.model_selection import train_test_split
 from PIL import Image
+def pause():
+    programPause = input("Press the <ENTER> key to continue...")
 
 n_hidden = [2000, 1600, 1200]; 
 
@@ -140,6 +142,8 @@ for i in range(datasize) :
     arr2 = arr2.astype(np.uint8)
 
     img2 = Image.fromarray(arr2,'L')
+    #img2.show()
+
     img2.save('recon_o/'+str(i)+'.jpg', 'JPEG')
 
 for path in SAVER_DIR:
@@ -176,6 +180,8 @@ for path in SAVER_DIR:
         arr = np.multiply(modified[i,:],255.).reshape(17,17);
 
         img = Image.fromarray(arr.astype(np.uint8), 'L')
+        img.show()
+        pause()
         if path[6] == "d":
             img.save('recon_d/'+str(i)+'.jpg', 'JPEG')
         #elif path[6] =="n":

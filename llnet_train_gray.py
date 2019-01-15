@@ -17,7 +17,7 @@ def argumentmax(data):
 #########
 #Data import
 ######
-n_hidden = [2000, 1600, 1200]; 
+n_hidden = [867, 578, 289]; 
 
 
 n_input =   289;
