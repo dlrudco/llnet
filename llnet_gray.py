@@ -99,14 +99,16 @@ encoder2 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder1, W_encode2), b_encode2))
 #encoder2 = tf.nn.dropout(encoder2,keeprate);
 
-W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
+#W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
+W_decode2 = tf.transpose(W_encode2)
 b_decode2 = tf.Variable(tf.random_normal([n_hidden[1]]))
 
 decoder2 = tf.nn.sigmoid(
 				tf.add(tf.matmul(encoder2, W_decode2), b_decode2))
 #decoder2 = tf.nn.dropout(decoder2,keeprate);
 
-W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
+#W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
+W_decode1 = tf.transpose(W_encode1)
 b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
 
 decoder1 = tf.nn.sigmoid(
@@ -116,7 +118,8 @@ decoder1 = tf.nn.sigmoid(
 decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
 
 
-W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
+#W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
+W_decode = tf.transpose(W_encode)
 b_decode = tf.Variable(tf.random_normal([n_input]))
 
 decoder = tf.nn.sigmoid(
