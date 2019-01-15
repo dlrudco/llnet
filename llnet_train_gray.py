@@ -75,7 +75,7 @@ for i in range (datasize):
 
 print("Data Load Complete\n")
 
-learning_rate = 0.1
+learning_rate = 0.05
 training_epoch = 1230
 batch_size = 20000
 
@@ -200,11 +200,11 @@ weight_decay_1 = tf.multiply(lamda,tf.add(fnorm_e,fnorm_d1));
 weight_decay_2 = tf.multiply(lamda,tf.add(fnorm_e1,fnorm_d2));
 weight_decay_3 = tf.multiply(lamda,fnorm_e2);
 
-cost_da1 = L2norm_pre1 + weight_decay_1 #+kl1
-cost_da2 = L2norm_pre2 + weight_decay_2 #+kl2
-cost_da3 = L2norm_pre3 + weight_decay_3 #+kl3
+cost_da1 = L2norm_pre1# + weight_decay_1 #+kl1
+cost_da2 = L2norm_pre2# + weight_decay_2 #+kl2
+cost_da3 = L2norm_pre3# + weight_decay_3 #+kl3
 
-cost_ssda = L2norm_total + weight_decay_tot;
+cost_ssda = L2norm_total# + weight_decay_tot;
 #######################################
 optimizer_da1 = tf.train.AdamOptimizer(learning_rate).minimize(cost_da1)
 optimizer_da2 = tf.train.AdamOptimizer(learning_rate).minimize(cost_da2)
