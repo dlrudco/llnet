@@ -117,7 +117,7 @@ encoder2 = tf.nn.sigmoid(
 #encoder2 = tf.nn.dropout(encoder2,keeprate);
 
 #W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
-W_decode = tf.transpose(W_encode2)
+W_decode2 = tf.transpose(W_encode2)
 b_decode2 = tf.Variable(tf.random_normal([n_hidden[1]]))
 
 decoder2 = tf.nn.sigmoid(
