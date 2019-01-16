@@ -59,3 +59,9 @@ model_noise_rlb531_gray/checkpoint
 model_noise_rlb531_gray/model-1230.data-00000-of-00001
 model_noise_rlb531_gray/model-1230.index
 model_noise_rlb531_gray/model-1230.meta
+model_dark_rlb0001011_gray/checkpoint
+*.index
+*.meta
+*.data-00000-of-00001
+model_dark_rlb000111_gray/checkpoint
+model_dark_rlb000131_gray/checkpoint
