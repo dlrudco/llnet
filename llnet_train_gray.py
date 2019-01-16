@@ -17,7 +17,7 @@ def argumentmax(data):
 #########
 #Data import
 ######
-n_hidden = [867, 578, 289]; 
+n_hidden = [2000, 1600, 1200]; 
 
 
 n_input =   289;
@@ -146,7 +146,7 @@ decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
 ######################################################
 #################cost&optimizer set###################
 rho = 0.0001;
-beta = 0.3;
+beta = 1.;
 lamda = 1.;
 
 L2norm_total = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder))),(2*batch_size));
@@ -215,7 +215,7 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb000131_gray"]
+SAVER_DIR = ["model_dark_rlb000111_gray"]
 			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
 			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
@@ -263,7 +263,7 @@ for path in SAVER_DIR:
 					total_cost = total_cost + cost_val1 
 
 				print("Pretraining DA1 Epoch:", "%04d" % (epoch + 1),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
 			elif epoch < 60:    
 				for i in range(total_batch):
 					_, cost_val2 = sess.run([optimizer_da2, cost_da2],
@@ -273,7 +273,7 @@ for path in SAVER_DIR:
 					#print(cost_val2.shape)
 					#print(cost_val3.shape)
 				print("Pretraining Epoch:", "%04d" % (epoch -29),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
 			elif epoch < 90:    
 				for i in range(total_batch):
 					_, cost_val3 = sess.run([optimizer_da3, cost_da3],
@@ -283,21 +283,21 @@ for path in SAVER_DIR:
 					#print(cost_val2.shape)
 					#print(cost_val3.shape)
 				print("Pretraining Epoch:", "%04d" % (epoch -59),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ (total_batch)))
+						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
 			elif epoch < 290:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_200, cost_ssda],
 						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
 				print("Finetuning Stage 1 Epoch:", "%04d" % (epoch -89),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ total_batch))
+						"Avg. cost =", "{:.12f}".format((total_cost)/ total_batch))
 			else:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_after, cost_ssda],
 						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
 				print("Finetuning Stage 2 Epoch:", "%04d" % (epoch -290 + 1),
-						"Avg. cost =", "{:.4f}".format((total_cost)/ total_batch))
+						"Avg. cost =", "{:.12f}".format((total_cost)/ total_batch))
 
 				if best_cost == np.inf:
 					best_cost = total_cost;
