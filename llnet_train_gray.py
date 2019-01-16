@@ -75,7 +75,7 @@ for i in range (datasize):
 
 print("Data Load Complete\n")
 
-learning_rate = 0.01
+learning_rate = 0.1
 training_epoch = 1290
 batch_size = 2000
 
