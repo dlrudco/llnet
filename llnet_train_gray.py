@@ -76,8 +76,8 @@ for i in range (datasize):
 print("Data Load Complete\n")
 
 learning_rate = 0.01
-training_epoch = 1230
-batch_size = 20000
+training_epoch = 1290
+batch_size = 2000
 
 
 
@@ -147,12 +147,12 @@ decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
 #################cost&optimizer set###################
 rho = 0.0001;
 beta = 0.3;
-lamda = 1;
+lamda = 1.;
 
-L2norm_total = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder),ord='euclidean')),(2*batch_size));
-L2norm_pre1 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder_pre),ord='euclidean')),(2*batch_size));
-L2norm_pre2 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder_pre,decoder1_pre),ord='euclidean')),(2*batch_size));
-L2norm_pre3 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder1_pre,decoder2),ord='euclidean')),(2*batch_size));
+L2norm_total = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder))),(2*batch_size));
+L2norm_pre1 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder_pre))),(2*batch_size));
+L2norm_pre2 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder_pre,decoder1_pre))),(2*batch_size));
+L2norm_pre3 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder1_pre,decoder2))),(2*batch_size));
 
 rhohat_e = tf.reduce_mean(encoder,0);
 rhohat_e1 = tf.reduce_mean(encoder1,0);
@@ -215,7 +215,7 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb531_gray"]
+SAVER_DIR = ["model_dark_rlb000131_gray"]
 			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
 			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
