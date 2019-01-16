@@ -145,7 +145,7 @@ decoder = tf.nn.sigmoid(
 decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
 ######################################################
 #################cost&optimizer set###################
-rho = 0.001;
+rho = 0.0001;
 beta = 0.3;
 lamda = 1;
 
