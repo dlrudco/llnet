@@ -91,68 +91,68 @@ ORG = tf.placeholder(tf.float32, [None, n_input])
 W_encode = tf.Variable(tf.random_normal([n_input, n_hidden[0]]))
 b_encode = tf.Variable(tf.random_normal([n_hidden[0]]))
 
-encoder = tf.nn.sigmoid(
-				tf.add(tf.matmul(X, W_encode), b_encode))
+encoder = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(X, W_encode), b_encode)),1e-12,1.)
 #encoder = tf.nn.dropout(encoder,keeprate);
-encoder_pre = tf.nn.sigmoid(
-				tf.add(tf.matmul(ORG, W_encode), b_encode))
+encoder_pre = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(ORG, W_encode), b_encode)),1e-12,1.)
 
 
 W_encode1 = tf.Variable(tf.random_normal([n_hidden[0], n_hidden[1]]))
 b_encode1 = tf.Variable(tf.random_normal([n_hidden[1]]))
 
 
-encoder1 = tf.nn.sigmoid(
-				tf.add(tf.matmul(encoder, W_encode1), b_encode1))
+encoder1 = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(encoder, W_encode1), b_encode1)),1e-12,1.)
 #encoder1 = tf.nn.dropout(encoder1,keeprate);
-encoder1_pre = tf.nn.sigmoid(
-				tf.add(tf.matmul(encoder_pre, W_encode1), b_encode1))
+encoder1_pre = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(encoder_pre, W_encode1), b_encode1)),1e-12,1.)
 
 W_encode2 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[2]]))
 b_encode2 = tf.Variable(tf.random_normal([n_hidden[2]]))
 
 
-encoder2 = tf.nn.sigmoid(
-				tf.add(tf.matmul(encoder1, W_encode2), b_encode2))
+encoder2 = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(encoder1, W_encode2), b_encode2)),1e-12,1.)
 #encoder2 = tf.nn.dropout(encoder2,keeprate);
 
 #W_decode2 = tf.Variable(tf.random_normal([n_hidden[2], n_hidden[1]]))
 W_decode2 = tf.transpose(W_encode2)
 b_decode2 = tf.Variable(tf.random_normal([n_hidden[1]]))
 
-decoder2 = tf.nn.sigmoid(
-				tf.add(tf.matmul(encoder2, W_decode2), b_decode2))
+decoder2 = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(encoder2, W_decode2), b_decode2)),1e-12,1.)
 #decoder2 = tf.nn.dropout(decoder2,keeprate);
 
 #W_decode1 = tf.Variable(tf.random_normal([n_hidden[1], n_hidden[0]]))
 W_decode1 = tf.transpose(W_encode1)
 b_decode1 = tf.Variable(tf.random_normal([n_hidden[0]]))
 
-decoder1 = tf.nn.sigmoid(
-				tf.add(tf.matmul(decoder2, W_decode1), b_decode1))
+decoder1 = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(decoder2, W_decode1), b_decode1)),1e-12,1.)
 #decoder1 = tf.nn.dropout(decoder1,keeprate);
 
-decoder1_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1))
+decoder1_pre = tf.clip_by_value(tf.nn.sigmoid(tf.add(tf.matmul(encoder1,W_decode1),b_decode1)),1e-12,1.)
 
 
 #W_decode = tf.Variable(tf.random_normal([n_hidden[0], n_input]))
 W_decode = tf.transpose(W_encode)
 b_decode = tf.Variable(tf.random_normal([n_input]))
 
-decoder = tf.nn.sigmoid(
-				tf.add(tf.matmul(decoder1, W_decode), b_decode))
+decoder = tf.clip_by_value(tf.nn.sigmoid(
+				tf.add(tf.matmul(decoder1, W_decode), b_decode)),1e-12,1.)
 #decoder = tf.nn.dropout(decoder,keeprate);
-decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
+decoder_pre = tf.clip_by_value(tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode)),1e-12,1.)
 ######################################################
 #################cost&optimizer set###################
-rho = 0.0001;
-beta = 0.01;
-lamda = 1.;
+rho = 0.001;
+beta = 0.1;
+lamda = 0.1;
 
-L2norm_total = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder))),(2*batch_size));
-L2norm_pre1 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder_pre))),(2*batch_size));
-L2norm_pre2 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder_pre,decoder1_pre))),(2*batch_size));
-L2norm_pre3 = tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder1_pre,decoder2))),(2*batch_size));
+L2norm_total = tf.clip_by_value(tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder))),(2*batch_size)),1e-12,1.)
+L2norm_pre1 = tf.clip_by_value(tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder_pre))),(2*batch_size)),1e-12,1.)
+L2norm_pre2 = tf.clip_by_value(tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder_pre,decoder1_pre))),(2*batch_size)),1e-12,1.)
+L2norm_pre3 = tf.clip_by_value(tf.divide(tf.reduce_mean(tf.square(tf.subtract(encoder1_pre,decoder2))),(2*batch_size)),1e-12,1.)
 
 rhohat_e = tf.reduce_mean(encoder,0);
 rhohat_e1 = tf.reduce_mean(encoder1,0);
@@ -161,14 +161,14 @@ rhohat_e2 = tf.reduce_mean(encoder2,0);
 #rhohat_d1 = tf.reduce_mean(decoder1_pre,0);
 #rhohat_d2 = tf.reduce_mean(decoder2);
 
-log_e = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e,1e-8,1.)));
-log_e_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-8,1.)));
+log_e = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e,1e-12,1.)));
+log_e_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e,1e-12,1.)));
 
-log_e1 = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e1,1e-8,1.)));
-log_e1_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e1,1e-8,1.)));
+log_e1 = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e1,1e-12,1.)));
+log_e1_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e1,1e-12,1.)));
 
-log_e2 = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e2,1e-8,1.)));
-log_e2_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e2,1e-8,1.)));
+log_e2 = tf.subtract(tf.log(rho),tf.log(tf.clip_by_value(rhohat_e2,1e-12,1.)));
+log_e2_1 = tf.subtract(tf.log(tf.to_float(1)-rho),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_e2,1e-12,1.)));
 
 #log_d1 = tf.subtract(tf.log(tf.clip_by_value(rho,1e-8,1.)),tf.log(tf.clip_by_value(rhohat_d1,1e-8,1.)));
 #log_d1_1 = tf.subtract(tf.log(tf.clip_by_value(tf.to_float(1)-rho,1e-8,1.)),tf.log(tf.clip_by_value(tf.to_float(1)-rhohat_d1,1e-8,1.)));
@@ -200,9 +200,9 @@ weight_decay_1 = tf.multiply(lamda,tf.add(fnorm_e,fnorm_d1));
 weight_decay_2 = tf.multiply(lamda,tf.add(fnorm_e1,fnorm_d2));
 weight_decay_3 = tf.multiply(lamda,fnorm_e2);
 
-cost_da1 = L2norm_pre1 + weight_decay_1 +kl1
-cost_da2 = L2norm_pre2 + weight_decay_2 +kl2
-cost_da3 = L2norm_pre3 + weight_decay_3 +kl3
+cost_da1 = tf.add(tf.add(L2norm_pre1,weight_decay_1),kl1)
+cost_da2 = tf.add(tf.add(L2norm_pre2,weight_decay_2),kl2)
+cost_da3 = tf.add(tf.add(L2norm_pre3,weight_decay_3),kl3)
 
 cost_ssda = L2norm_total + weight_decay_tot;
 #######################################
@@ -237,7 +237,6 @@ for path in SAVER_DIR:
 	sess.run(init)
 
 	earlystop = 0;
-
 	if ckpt and ckpt.model_checkpoint_path:
 		saver.restore(sess, ckpt.model_checkpoint_path)    
 		print("Model  " + path + "  Load Complete")
@@ -247,7 +246,11 @@ for path in SAVER_DIR:
 		print("Model  " + path + "  Train Start")    
 
 		for epoch in range(training_epoch):
+			
 			total_cost = 0
+			testcost_k = 0
+			testcost_l = 0
+			testcost_w = 0
 			orig =  np.random.RandomState(epoch).permutation(orig_data);
 			if path[6] == "d":
 				batch = np.random.RandomState(epoch).permutation(dark_data)
@@ -262,10 +265,19 @@ for path in SAVER_DIR:
 				for i in range(total_batch):
 					_, cost_val1 = sess.run([optimizer_da1, cost_da1],
 						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					
 					total_cost = total_cost + cost_val1 
-
+					testk1 = sess.run(kl1,feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					testw1 = sess.run(weight_decay_1,feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					testl1 = sess.run(L2norm_pre1,feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
+					testcost_k = testcost_k+testk1
+					testcost_w = testcost_w+testw1
+					testcost_l = testcost_l+testl1
 				print("Pretraining DA1 Epoch:", "%04d" % (epoch + 1),
-						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
+						"Avg. cost =", "{:.12f}".format((total_cost)))
+				print("testcost k:", "{:.12f}".format(testcost_k))
+				print("testcost w:", "{:.12f}".format(testcost_l))
+				print("testcost l:", "{:.12f}".format(testcost_w))				
 			elif epoch < 60:    
 				for i in range(total_batch):
 					_, cost_val2 = sess.run([optimizer_da2, cost_da2],
@@ -274,8 +286,8 @@ for path in SAVER_DIR:
 					#print(cost_val1.shape)
 					#print(cost_val2.shape)
 					#print(cost_val3.shape)
-				print("Pretraining Epoch:", "%04d" % (epoch -29),
-						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
+				print("Pretraining DA2 Epoch:", "%04d" % (epoch -29),
+						"Avg. cost =", "{:.12f}".format((total_cost)))
 			elif epoch < 90:    
 				for i in range(total_batch):
 					_, cost_val3 = sess.run([optimizer_da3, cost_da3],
@@ -284,22 +296,22 @@ for path in SAVER_DIR:
 					#print(cost_val1.shape)
 					#print(cost_val2.shape)
 					#print(cost_val3.shape)
-				print("Pretraining Epoch:", "%04d" % (epoch -59),
-						"Avg. cost =", "{:.12f}".format((total_cost)/ (total_batch)))
+				print("Pretraining DA3 Epoch:", "%04d" % (epoch -59),
+						"Avg. cost =", "{:.12f}".format((total_cost)))
 			elif epoch < 290:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_200, cost_ssda],
 						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
 				print("Finetuning Stage 1 Epoch:", "%04d" % (epoch -89),
-						"Avg. cost =", "{:.12f}".format((total_cost)/ total_batch))
+						"Avg. cost =", "{:.12f}".format((total_cost)))
 			else:
 				for i in range(total_batch):
 					_, cost_val = sess.run([optimizer_ssda_after, cost_ssda],
 						feed_dict={X: batch[i : i + batch_size,:],ORG: orig[i : i + batch_size,:]})
 					total_cost += cost_val
 				print("Finetuning Stage 2 Epoch:", "%04d" % (epoch -290 + 1),
-						"Avg. cost =", "{:.12f}".format((total_cost)/ total_batch))
+						"Avg. cost =", "{:.12f}".format((total_cost)))
 
 				if best_cost == np.inf:
 					best_cost = total_cost;
