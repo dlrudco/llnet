@@ -9,7 +9,7 @@ from PIL import Image
 def pause():
     programPause = input("Press the <ENTER> key to continue...")
 
-n_hidden = [867, 578, 289]; 
+n_hidden = [2000, 1600, 1200]; 
 
 n_input =   289;
 datasize = 8370;
@@ -128,7 +128,7 @@ decoder = tf.nn.sigmoid(
 #decoder = tf.nn.dropout(decoder,keeprate);
 decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
 
-SAVER_DIR = ["model_dark_rlb531_gray"]
+SAVER_DIR = ["model_dark_rlb0001011_gray"]
 			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 
 arr = np.empty((datasize,17,17))
@@ -174,13 +174,14 @@ for path in SAVER_DIR:
     #           feed_dict={X:comb_data})
 
     for i in range(datasize) :
+        
+        arr = np.multiply(modified[i,:],255.).reshape(17,17);
         if i%1000 == 0:
             print(i)
-        arr = np.multiply(modified[i,:],255.).reshape(17,17);
-
+            print(arr.astype(np.uint8))
         img = Image.fromarray(arr.astype(np.uint8), 'L')
-        img.show()
-        pause()
+        #img.show()
+        #pause()
         if path[6] == "d":
             img.save('recon_d/'+str(i)+'.jpg', 'JPEG')
         #elif path[6] =="n":
