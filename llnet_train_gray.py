@@ -146,7 +146,7 @@ decoder_pre = tf.nn.sigmoid(tf.add(tf.matmul(encoder,W_decode),b_decode))
 ######################################################
 #################cost&optimizer set###################
 rho = 0.0001;
-beta = 1.;
+beta = 0.01;
 lamda = 1.;
 
 L2norm_total = tf.divide(tf.reduce_mean(tf.square(tf.subtract(ORG,decoder))),(2*batch_size));
@@ -215,7 +215,7 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_dark_rlb000111_gray"]
+SAVER_DIR = ["model_dark_rlb0001011_gray"]
 			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
 			#,"model_dark_rlb10101_2","model_noise_rlb10101_2","model_combine_rlb10101_2"]
@@ -255,6 +255,8 @@ for path in SAVER_DIR:
 				batch = np.random.RandomState(epoch).permutation(nois_data)
 			elif path[6] == "c":
 				batch = np.random.RandomState(epoch).permutation(comb_data);
+			
+			
 			
 			if epoch < 30:    
 				for i in range(total_batch):
@@ -307,9 +309,12 @@ for path in SAVER_DIR:
 				elif best_cost>total_cost :
 					saver.save(sess, ckpt_path, global_step=training_epoch)
 					best_cost = total_cost
+					earlystop = 0
 					print("model saved")
-				elif best_cost*1.05 < total_cost:
-					break
+				elif best_cost< total_cost:
+					earlystop += 1
+					if earlystop >30:
+						break
 					#continue
 
 	print("Optimization for model " + path + " complete")
