@@ -9,7 +9,7 @@ nimg = zeros(200,419);
 
 for i=1:1:k
     imgname = sprintf('%d.jpg',i-1);
-    patch(:,:,i) = imread(strcat(path,'/',imgname));
+    patch(:,:,i) = (imread(strcat(path,'/',imgname)));
 end
 lpatch = gather(patch);
 for i = 1:1:62
@@ -19,4 +19,5 @@ for i = 1:1:62
     end
 end
 nimg = uint8(nimg ./ weight);
+figure(20)
 imshow(nimg);
