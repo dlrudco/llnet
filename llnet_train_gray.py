@@ -33,12 +33,13 @@ comb_data=np.empty((datasize,n_input))
 
 
 try:
+	tunemore = True
 	orig_data = loadcsv("gray_original.csv")
 	print("orig_data load complete")
-	#dark_data = loadcsv("gray_dark.csv")
-	#print("dark_data load complete")
-	nois_data = loadcsv("gray_noise.csv")
-	print("nois_data load complete")
+	# dark_data = loadcsv("gray_dark.csv")
+	# print("dark_data load complete")
+	# nois_data = loadcsv("gray_noise.csv")
+	# print("nois_data load complete")
 	# comb_data = loadcsv("gray_combine.csv")
 	# print("comb_data load complete")
 except :
@@ -98,10 +99,6 @@ batch_size = 2000
 
 X = tf.placeholder(tf.float32, [None, n_input])
 ORG = tf.placeholder(tf.float32, [None, n_input])
-X_l1 = tf.placeholder(tf.float32, [None, n_hidden[0]])
-ORG_l1 = tf.placeholder(tf.float32, [None, n_hidden[0]])
-X_l2 = tf.placeholder(tf.float32, [None, n_hidden[1]])
-ORG_l2 = tf.placeholder(tf.float32, [None, n_hidden[1]])
 ###########Dropout rate set##################
 #keeprate = tf.placeholder(tf.float32)
 ####################################
@@ -251,7 +248,7 @@ optimizer_ssda_after = tf.train.AdamOptimizer(0.1*learning_rate).minimize(cost_s
 ####################################################
 
 total_batch = int(datasize/batch_size)
-SAVER_DIR = ["model_noise_rlb850015000015_gray"]
+SAVER_DIR = ["model_dark_rlb850015000015_gray_test_orig"]
 #,"model_noise_rlb85000200005_gray","model_combine_rlb85000200005_gray"]
 			#,"model_noise_rlb531_gray","model_combine_rlb531_gray"]
 			#,"model_dark_rlb10101_1","model_noise_rlb10101_1","model_combine_rlb10101_1"
@@ -274,11 +271,11 @@ for path in SAVER_DIR:
 	sess.run(init)
 
 	earlystop = 0;
-	if ckpt and ckpt.model_checkpoint_path:
+	if ckpt and ckpt.model_checkpoint_path and (not tunemore):
 		saver.restore(sess, ckpt.model_checkpoint_path)    
 		print("Model  " + path + "  Load Complete")
 	else :
-
+		saver.restore(sess, ckpt.model_checkpoint_path)
 		print("Model  " + path + "  Train Start")
 		#ckpt_path = os.path.join("model_dark_rlb8500100005_gray_test_l1","model")
 		#ckpt = tf.train.get_checkpoint_state("model_dark_rlb8500100005_gray_test_l1")    
@@ -298,7 +295,7 @@ for path in SAVER_DIR:
 			seed=randint(1,20000)
 			orig =  np.random.RandomState(seed).permutation(orig_data);
 			if path[6] == "d":
-				batch = np.random.RandomState(seed).permutation(dark_data)
+				batch = np.random.RandomState(seed).permutation(orig_data)
 			elif path[6] =="n":
 				batch = np.random.RandomState(seed).permutation(nois_data)
 			elif path[6] == "c":
@@ -313,14 +310,14 @@ for path in SAVER_DIR:
 			#else:
 			#	print("changed what shouldn't change")
 			if oldflag != flag:
-				ckpt_path = os.path.join(path+"_test_l"+str(flag+1),"model")
-				ckpt = tf.train.get_checkpoint_state(path+"_test_l"+str(flag+1))    
+				ckpt_path = os.path.join(path+"_l"+str(flag+1),"model")
+				ckpt = tf.train.get_checkpoint_state(path+"_l"+str(flag+1))    
 				if ckpt and ckpt.model_checkpoint_path:
 					saver.restore(sess, ckpt.model_checkpoint_path)    
-					print("Model  " + path+"_test_l"+str(flag+1) + "  Load Complete")
+					print("Model  " + path+"_l"+str(flag+1) + "  Load Complete")
 					best_cost = np.inf
 				else :
-					print("Model  " + path+"_test_l"+str(flag+1) + "  Train Start")
+					print("Model  " + path+"_l"+str(flag+1) + "  Train Start")
 					best_cost = np.inf
 			oldflag = flag
 			if epoch < 60:    
@@ -558,12 +555,12 @@ for path in SAVER_DIR:
 					print("NaN cost!! check parameters")
 					break
 				elif best_cost>total_cost :
-					ckpt_path = os.path.join(path+"_test_l"+str(flag+1),"model")
-					ckpt = tf.train.get_checkpoint_state(path+"_test_l"+str(flag+1))
+					ckpt_path = os.path.join(path+"_l"+str(flag+1),"model")
+					ckpt = tf.train.get_checkpoint_state(path+"_l"+str(flag+1))
 					saver.save(sess, ckpt_path, global_step=training_epoch)
 					best_cost = total_cost
 					earlystop = 0
-					print("model  " + path+"_test_l"+str(flag+1) + "  saved")
+					print("model  " + path+"_l"+str(flag+1) + "  saved")
 				elif best_cost< total_cost:
 					earlystop += 1
 					if earlystop >30:
@@ -571,8 +568,8 @@ for path in SAVER_DIR:
 						epoch = -1
 						earlystop =0
 						if flag > 1:
-							ckpt_path = os.path.join(path+"_test_l"+str(flag),"model")
-							ckpt = tf.train.get_checkpoint_state(path+"_test_l"+str(flag))
+							ckpt_path = os.path.join(path+"_l"+str(flag),"model")
+							ckpt = tf.train.get_checkpoint_state(path+"_l"+str(flag))
 							saver.restore(sess, ckpt.model_checkpoint_path)
 							ckpt_path = os.path.join(path,"model")
 							ckpt = tf.train.get_checkpoint_state(path)
@@ -591,10 +588,10 @@ for path in SAVER_DIR:
 
 	orig_test = loadcsv("gray_original_test.csv")
 	print("orig_test load complete")
-	#test = loadcsv("gray_dark_test.csv")
-	#print("dark_data load complete")
-	test = loadcsv("gray_noise_test.csv")
-	print("nois_data load complete")
+	test = loadcsv("gray_dark_test.csv")
+	print("dark_data load complete")
+	# test = loadcsv("gray_noise_test.csv")
+	# print("nois_data load complete")
 	# test = loadcsv("gray_combine_test.csv")
 	# print("comb_data load complete")
 

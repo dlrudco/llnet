@@ -154,7 +154,7 @@ for path in SAVER_DIR:
     start_time = time.time()
     #orig_test = iu.split("normal_car.jpg")
     #print("orig_test load complete")
-    test = iu.split("dark_car.jpg")
+    test = iu.split("superdark_car.jpg")
     print("dark_test load complete")
     if ckpt and ckpt.model_checkpoint_path:
         saver.restore(sess, ckpt.model_checkpoint_path)
@@ -196,7 +196,7 @@ for path in SAVER_DIR:
     print("---Total process %s seconds ---" % (time.time() - start_time))
     result.show()
     if path[6] == "d" :
-        result.save('recon_dark_car.jpg', 'JPEG')
+        result.save('recon_superdark_car_r.jpg', 'JPEG')
     elif path[6] == "n" :
         result.save('recon_noise_car.jpg', 'JPEG')
     elif path[6] == "c" :
